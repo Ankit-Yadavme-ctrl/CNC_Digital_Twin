@@ -187,3 +187,10 @@ Keep broker passwords, dashboard credentials, raw datasets, generated telemetry,
 \- Improve authentication and model monitoring.
 
 \- Add automated tests and reproducible evaluation reports.
+
+## 📸 Live Dashboard
+
+The CNC Digital Twin dashboard displays live sensor telemetry received through MQTT, including temperature, vibration, spindle RPM, motor current, and tool wear. It also shows AI-based machine-status classification and warning alerts.
+
+![CNC Digital Twin Live Dashboard](screenshots/dashboard-live.png)
+
