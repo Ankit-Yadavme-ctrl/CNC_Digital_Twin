@@ -1,0 +1,9 @@
+
+streamlit
+pandas
+joblib
+scikit-learn
+streamlit-autorefresh
+paho-mqtt
+numpy
+matplotlib

@@ -1,0 +1,72 @@
+{
+  "dataset": "C:\\Users\\Asus\\Desktop\\CNC_Digital_Twin\\data\\processed\\phm2010_c1_features.csv",
+  "rows": 315,
+  "features": [
+    "channel_1_mean",
+    "channel_1_std",
+    "channel_1_rms",
+    "channel_1_min",
+    "channel_1_max",
+    "channel_1_abs_mean",
+    "channel_2_mean",
+    "channel_2_std",
+    "channel_2_rms",
+    "channel_2_min",
+    "channel_2_max",
+    "channel_2_abs_mean",
+    "channel_3_mean",
+    "channel_3_std",
+    "channel_3_rms",
+    "channel_3_min",
+    "channel_3_max",
+    "channel_3_abs_mean",
+    "channel_4_mean",
+    "channel_4_std",
+    "channel_4_rms",
+    "channel_4_min",
+    "channel_4_max",
+    "channel_4_abs_mean",
+    "channel_5_mean",
+    "channel_5_std",
+    "channel_5_rms",
+    "channel_5_min",
+    "channel_5_max",
+    "channel_5_abs_mean",
+    "channel_6_mean",
+    "channel_6_std",
+    "channel_6_rms",
+    "channel_6_min",
+    "channel_6_max",
+    "channel_6_abs_mean",
+    "channel_7_mean",
+    "channel_7_std",
+    "channel_7_rms",
+    "channel_7_min",
+    "channel_7_max",
+    "channel_7_abs_mean"
+  ],
+  "target": "mean(flute_1, flute_2, flute_3)",
+  "target_unit": "10^-3 mm",
+  "split": "chronological 80% train / 20% test",
+  "train_cuts": 252,
+  "test_cuts": 63,
+  "results": {
+    "Mean baseline": {
+      "MAE": 51.079251836230156,
+      "RMSE": 51.79675399462322,
+      "R2": -35.34693397802147
+    },
+    "Linear Regression": {
+      "MAE": 15.311773877568234,
+      "RMSE": 27.62418393931879,
+      "R2": -9.33812093142163
+    },
+    "Random Forest": {
+      "MAE": 19.444019527217435,
+      "RMSE": 21.29901228368655,
+      "R2": -5.145845265536326
+    }
+  },
+  "best_by_test_MAE": "Linear Regression",
+  "warning": "Exploratory single-cutter evaluation. Test-based model selection can be optimistic; validate on other labeled cutters before claiming generalization."
+}

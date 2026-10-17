@@ -1,0 +1,46 @@
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Secrets and local environment files
+.env
+.env.*
+!.env.example
+
+# Live telemetry and private datasets
+data/*.csv
+data_processed/
+data/
+!data/.gitkeep
+
+# Model files
+*.pkl
+*.joblib
+*.h5
+*.pt
+*.pth
+
+# Raw experimental datasets
+PHM2010/
+c1/
+c1_wear.csv
+
+# Local backups and logs
+*_backup.csv
+*.log
+
+# IDE and operating system
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+# Local databases
+database/*.db
+database/*.sqlite
+database/*.sqlite3
