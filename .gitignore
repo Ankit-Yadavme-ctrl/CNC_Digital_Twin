@@ -44,3 +44,10 @@ Thumbs.db
 database/*.db
 database/*.sqlite
 database/*.sqlite3
+
+# Streamlit secrets
+.streamlit/
+
+# Local dashboard backups
+dashboard/*backup*.py
+dashboard/*pre_mqtt*.py
