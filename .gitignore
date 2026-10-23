@@ -51,3 +51,13 @@ database/*.sqlite3
 # Local dashboard backups
 dashboard/*backup*.py
 dashboard/*pre_mqtt*.py
+
+# Keep local database files private; publish only database scripts
+database/*
+!database/*.py
+
+# Ignore dashboard backup files
+dashboard/*before_mqtt*.py
+
+# Generated model predictions
+models/*_predictions.csv
