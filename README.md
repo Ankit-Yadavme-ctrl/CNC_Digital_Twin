@@ -1,196 +1,144 @@
-\# CNC Digital Twin — AI-Driven Smart Manufacturing
+# CNC Digital Twin — AI-Driven Smart Manufacturing
 
+A student project demonstrating real-time CNC machine monitoring using MQTT, Python, Streamlit, and machine learning.
 
+## Features
 
-A student project exploring real-time CNC machine monitoring using MQTT, Python, Streamlit, and machine-learning experiments.
+- **Live sensor monitoring:** Receives simulated CNC sensor readings through HiveMQ Cloud using MQTT.
+- **Interactive dashboard:** Displays temperature, vibration, spindle RPM, motor current, tool wear, and machine status.
+- **AI-based classification:** Uses a trained machine-learning model to classify readings as NORMAL or WARNING.
+- **Live visualization:** Displays sensor metrics, prediction results, and historical charts.
+- **Data logging:** Supports storing incoming telemetry locally in CSV and SQLite.
+- **Offline research:** Includes separate experiments using the PHM2010 cutting-tool wear dataset.
 
+## System Architecture
 
+1. A Python simulator generates synthetic CNC sensor readings.
+2. The simulator publishes messages to HiveMQ Cloud using MQTT.
+3. The Streamlit dashboard subscribes to the configured MQTT topic.
+4. Incoming readings are processed and displayed in the dashboard.
+5. An AI classification model predicts NORMAL or WARNING.
+6. Separate scripts support local data storage and offline tool-wear experiments.
 
-\## Features
+**MQTT topic:** `factory/cnc/CNC_01/sensors`
 
+## Technologies
 
+Python, Streamlit, Pandas, NumPy, scikit-learn, Joblib, Matplotlib, Paho MQTT, HiveMQ Cloud, SQLite, Git, and GitHub.
 
-\- \*\*Live telemetry pipeline:\*\* Simulated CNC sensor data is published using MQTT through HiveMQ Cloud.
+## Project Structure
 
-\- \*\*Monitoring dashboard:\*\* Streamlit displays temperature, vibration, spindle RPM, motor current, tool wear, and machine status.
-
-\- \*\*Data logging:\*\* The MQTT receiver stores incoming readings in a local CSV file.
-
-\- \*\*Offline ML experiments:\*\* PHM2010 cutting-tool data is used for feature extraction, model comparison, and wear-prediction evaluation.
-
-
-
-\## Architecture
-
-
-
-1\. Python simulator generates synthetic CNC sensor readings.
-
-2\. Paho MQTT publishes messages to HiveMQ Cloud.
-
-3\. An MQTT receiver subscribes to the topic and saves readings locally.
-
-4\. Streamlit reads the CSV and presents the dashboard.
-
-5\. Separate offline scripts analyze PHM2010 data and evaluate ML models.
-
-
-
-\*\*MQTT topic:\*\* `factory/cnc/CNC\_01/sensors`
-
-
-
-\## Technologies
-
-
-
-Python, Streamlit, Pandas, NumPy, scikit-learn, Matplotlib, Joblib, Paho MQTT, HiveMQ Cloud, Git, and GitHub.
-
-
-
-\## Setup
-
-
-
-\### 1. Clone the repository
-
-
-
-```bash
-
-git clone YOUR\_GITHUB\_REPOSITORY\_URL
-
-cd CNC\_Digital\_Twin
-
+```text
+CNC_Digital_Twin/
+├── app.py
+├── requirements.txt
+├── README.md
+├── dashboard/
+│   ├── cloud_dashboard.py
+│   ├── cloud_mqtt.py
+│   └── login.py
+├── generator/
+│   └── synthetic_data_hivemq.py
+├── mqtt/
+│   └── hivemq_to_csv.py
+├── database/
+│   └── csv_to_sqlite.py
+├── ml/
+│   ├── train_model.py
+│   └── test_model.py
+├── models/
+├── screenshots/
+└── analysis/
 ```
 
+## Setup
 
-
-\### 2. Install dependencies
-
-
+### 1. Clone the repository
 
 ```bash
+git clone YOUR_GITHUB_REPOSITORY_URL
+cd CNC_Digital_Twin
+```
 
+### 2. Install dependencies
+
+```bash
 python -m pip install -r requirements.txt
-
 ```
 
+### 3. Configure HiveMQ Cloud credentials
 
+The simulator reads these environment variables:
 
-\### 3. Configure HiveMQ Cloud credentials
+- `HIVEMQ_BROKER`
+- `HIVEMQ_PORT`
+- `HIVEMQ_USERNAME`
+- `HIVEMQ_PASSWORD`
 
+Configure them in the terminal used to run the simulator.
 
+### 4. Configure Streamlit secrets
 
-Set these environment variables in your terminal:
+Create `.streamlit/secrets.toml` locally with the following structure:
 
+```toml
+dashboard_username = "YOUR_DASHBOARD_USERNAME"
+dashboard_password = "YOUR_DASHBOARD_PASSWORD"
 
-
-\- `HIVEMQ\_BROKER`
-
-\- `HIVEMQ\_PORT`
-
-\- `HIVEMQ\_USERNAME`
-
-\- `HIVEMQ\_PASSWORD`
-
-
-
-Never commit credentials or `.env` files.
-
-
-
-\### 4. Start the MQTT receiver
-
-
-
-Configure the environment variables in the receiver's terminal, then run:
-
-
-
-```bash
-
-python mqtt/hivemq\_to\_csv.py
-
+[mqtt]
+host = "YOUR_CLUSTER_HOST"
+port = 8883
+username = "YOUR_HIVEMQ_USERNAME"
+password = "YOUR_HIVEMQ_PASSWORD"
+topic = "factory/cnc/CNC_01/sensors"
 ```
 
+Replace the placeholders with your own credentials. Never commit this file or share its contents publicly.
 
+### 5. Start the sensor simulator
 
-\### 5. Start the simulator
-
-
-
-In a separate terminal with the same MQTT environment variables, run:
-
-
+In a terminal where the HiveMQ environment variables are configured:
 
 ```bash
-
-python generator/synthetic\_data\_hivemq.py
-
+python generator/synthetic_data_hivemq.py
 ```
 
+### 6. Start the dashboard
 
-
-\### 6. Start the dashboard
-
-
-
-Set `DASHBOARD\_USERNAME` and `DASHBOARD\_PASSWORD` in the dashboard terminal, then run:
-
-
+In another terminal:
 
 ```bash
-
 python -m streamlit run app.py
-
 ```
-
-
 
 Open the local URL printed by Streamlit.
 
+The dashboard also requires its configured AI model and valid MQTT credentials.
 
-
-\## Important limitations
-
-
-
-\- Live sensor readings are \*\*simulated\*\*, not collected from a physical CNC machine.
-
-\- PHM2010 modelling is a separate offline research component.
-
-\- Experimental wear models showed limited generalization on chronological test data. Their predictions should not be treated as validated industrial measurements.
-
-\- The dashboard's failure-prediction model must be independently validated before its results are used for real maintenance decisions.
-
-\- The demo login is not production-grade authentication.
-
-
-
-\## Security
-
-
-
-Keep broker passwords, dashboard credentials, raw datasets, generated telemetry, and private model files out of public version control. Configure credentials through environment variables.
-
-
-
-\## Future improvements
-
-
-
-\- Validate models on additional operating conditions.
-
-\- Connect physical sensors to the MQTT pipeline.
-
-\- Improve authentication and model monitoring.
-
-\- Add automated tests and reproducible evaluation reports.
-
-## 📸 Live Dashboard
-
-The CNC Digital Twin dashboard displays live sensor telemetry received through MQTT, including temperature, vibration, spindle RPM, motor current, and tool wear. It also shows AI-based machine-status classification and warning alerts.
+## Dashboard Screenshot
 
 ![CNC Digital Twin Live Dashboard](screenshots/dashboard-live.png)
 
+## Important Limitations
+
+- Sensor readings are simulated; the current prototype is not connected to a physical CNC machine.
+- The classification model is trained using generated data with rule-based labels. Its accuracy does not establish real-world CNC failure prediction accuracy.
+- The PHM2010 tool-wear experiments are a separate offline research component.
+- Experimental tool-wear models require further validation before industrial use.
+- The login mechanism is intended for demonstration and is not production-grade authentication.
+- AI predictions should not be used alone to make real maintenance decisions.
+
+## Security
+
+- Keep HiveMQ credentials and dashboard passwords private.
+- Never commit `.streamlit/secrets.toml`, local databases, or private datasets.
+- Review model and data files before publishing the repository.
+- Configure secrets separately in any cloud deployment.
+
+## Future Improvements
+
+- Validate the AI model using real CNC sensor data.
+- Integrate physical sensors into the MQTT pipeline.
+- Improve authentication and model monitoring.
+- Add automated tests and reproducible model evaluation.
+- Improve fault detection and maintenance alerting.
