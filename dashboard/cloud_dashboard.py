@@ -120,6 +120,14 @@ REQUIRED_COLUMNS = [
     "tool_wear",
 ]
 
+# Prototype alert thresholds. Tune these using CNC manufacturer limits and
+# real machine measurements before using the dashboard operationally.
+ALERT_THRESHOLDS = {
+    "temperature": 52.0,   # °C; aligned with the synthetic training rule
+    "vibration": 0.45,      # g; aligned with the synthetic training rule
+    "tool_wear": 80.0,      # %; illustrative threshold, validate before use
+}
+
 # --------------------------------------------------
 # LOAD AI MODEL
 # --------------------------------------------------
@@ -258,6 +266,36 @@ row2 = st.columns(2)
 row2[0].metric("🔌 Motor Current", f"{motor_current:.2f} A")
 row2[1].metric("🛠️ Tool Wear", f"{tool_wear:.2f} %")
 
+st.subheader("Smart Sensor Alerts")
+active_alerts = []
+if temperature > ALERT_THRESHOLDS["temperature"]:
+    active_alerts.append(
+        f"Temperature is {temperature:.1f} °C, above the configured "
+        f"{ALERT_THRESHOLDS['temperature']:.1f} °C threshold."
+    )
+if vibration > ALERT_THRESHOLDS["vibration"]:
+    active_alerts.append(
+        f"Vibration is {vibration:.3f} g, above the configured "
+        f"{ALERT_THRESHOLDS['vibration']:.3f} g threshold."
+    )
+if tool_wear > ALERT_THRESHOLDS["tool_wear"]:
+    active_alerts.append(
+        f"Tool wear is {tool_wear:.1f}%, above the configured "
+        f"{ALERT_THRESHOLDS['tool_wear']:.1f}% threshold."
+    )
+
+if active_alerts:
+    for alert_message in active_alerts:
+        st.warning("⚠️ " + alert_message)
+else:
+    st.success("No configured sensor thresholds are currently exceeded.")
+
+st.caption(
+    "Prototype thresholds: temperature and vibration match rules used in the "
+    "synthetic dataset; the tool-wear threshold is illustrative. Validate all "
+    "thresholds against machine documentation and real operating data."
+)
+
 st.divider()
 
 # --------------------------------------------------
@@ -350,6 +388,43 @@ if model_loaded:
 else:
     st.info("AI prediction is disabled because the trained model is unavailable.")
 
+st.subheader("AI Prediction Trend")
+if model_loaded:
+    trend_data = df.tail(100).copy()
+    try:
+        trend_input = trend_data[REQUIRED_COLUMNS]
+        trend_predictions = model.predict(trend_input)
+        trend_data["AI predicted status"] = [
+            "NORMAL" if str(value).upper() in {"0", "NORMAL"}
+            else "WARNING" if str(value).upper() in {"1", "WARNING"}
+            else str(value).upper()
+            for value in trend_predictions
+        ]
+        prediction_counts = (
+            trend_data["AI predicted status"]
+            .value_counts()
+            .reindex(["NORMAL", "WARNING"], fill_value=0)
+        )
+        trend_left, trend_right = st.columns([1, 2])
+        with trend_left:
+            st.markdown("**Latest 100 available readings**")
+            st.dataframe(
+                prediction_counts.rename_axis("AI status").reset_index(name="Readings"),
+                use_container_width=True,
+                hide_index=True,
+            )
+        with trend_right:
+            st.markdown("**Prediction distribution**")
+            st.bar_chart(prediction_counts)
+        st.caption(
+            "Historical predictions are recalculated from the available sensor "
+            "rows. They are not proof of real-world machine failure."
+        )
+    except Exception as exc:
+        st.info(f"Could not calculate the AI prediction trend: {exc}")
+else:
+    st.info("Load the trained model to display AI prediction trends.")
+
 st.divider()
 
 # --------------------------------------------------
@@ -386,6 +461,55 @@ if not chart_data.empty:
                 st.info(f"{label} data is unavailable.")
 else:
     st.info("Not enough valid history is available to draw charts yet.")
+
+# --------------------------------------------------
+# MACHINE PERFORMANCE ANALYTICS
+# --------------------------------------------------
+st.subheader("Machine Performance Analytics")
+analytics_data = df.tail(100).copy()
+
+analytics1, analytics2, analytics3, analytics4 = st.columns(4)
+analytics1.metric("Readings analysed", f"{len(analytics_data):,}")
+analytics2.metric(
+    "Average temperature",
+    f"{analytics_data['temperature'].mean():.1f} °C",
+)
+analytics3.metric(
+    "Average vibration",
+    f"{analytics_data['vibration'].mean():.3f} g",
+)
+if "status" in analytics_data.columns:
+    statuses = analytics_data["status"].astype(str).str.upper()
+    warning_count = int(statuses.isin(["WARNING", "CRITICAL"]).sum())
+    warning_rate = (warning_count / len(analytics_data) * 100) if len(analytics_data) else 0
+    analytics4.metric("Sensor warning rate", f"{warning_rate:.1f}%")
+else:
+    warning_count = 0
+    analytics4.metric("Sensor warning rate", "N/A")
+
+analytics_left, analytics_right = st.columns(2)
+with analytics_left:
+    st.markdown("**Sensor-reported status frequency**")
+    if "status" in analytics_data.columns:
+        status_counts = (
+            analytics_data["status"].astype(str).str.upper().value_counts()
+        )
+        st.bar_chart(status_counts)
+    else:
+        st.info("Status field is unavailable in the current data.")
+with analytics_right:
+    st.markdown("**Average and maximum sensor readings**")
+    summary = pd.DataFrame({
+        "Average": analytics_data[REQUIRED_COLUMNS].mean(),
+        "Maximum": analytics_data[REQUIRED_COLUMNS].max(),
+    })
+    summary.index.name = "Sensor"
+    st.dataframe(summary, use_container_width=True)
+
+st.caption(
+    "Analytics summarize the latest 100 valid readings, not confirmed machine uptime. "
+    "Warning frequency reflects the sensor-provided status field, not the AI prediction."
+)
 
 # --------------------------------------------------
 # RECENT SENSOR DATA
